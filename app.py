@@ -17,19 +17,13 @@ st.set_page_config(
 st.markdown("""
 <style>
   .block-container { padding-top: 1.2rem; padding-bottom: 1rem; }
-  .rozet {
-    display: inline-block; padding: 3px 10px; border-radius: 5px;
-    font-size: 12px; font-weight: 600; margin: 2px;
-  }
-  .baslik {
-    background: linear-gradient(135deg, #cc0000, #8b0000);
-    color: white; padding: 18px 24px; border-radius: 14px; margin-bottom: 18px;
-  }
+  .rozet { display:inline-block; padding:3px 10px; border-radius:5px;
+    font-size:12px; font-weight:600; margin:2px; }
+  .baslik { background:linear-gradient(135deg,#cc0000,#8b0000);
+    color:white; padding:18px 24px; border-radius:14px; margin-bottom:18px; }
   div[data-testid="stExpander"] {
-    border: 1px solid #e0e0e0 !important;
-    border-radius: 10px !important;
-    margin-bottom: 6px;
-  }
+    border:1px solid #e0e0e0 !important; border-radius:10px !important; margin-bottom:6px; }
+  .plan-kutu { border-radius:10px; padding:12px 16px; margin-bottom:8px; font-size:13px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -40,10 +34,34 @@ except Exception:
     API_KEY = None
 
 # ══════════════════════════════════════════════════════════════════════════════
+# PLAN TANIMLARI
+# ══════════════════════════════════════════════════════════════════════════════
+PLANLAR = {
+    "Ücretsiz (8 istek/dk)": {
+        "rate_per_min": 8,
+        "sleep":        8.0,   # 60/8 = 7.5sn, biraz marj
+        "batch_size":   6,     # güvenli batch
+        "aciklama":     "Ücretsiz · Yavaş ama gerçek veri · Test için ideal"
+    },
+    "Grow ($29/ay — 55 istek/dk)": {
+        "rate_per_min": 55,
+        "sleep":        1.2,
+        "batch_size":   50,
+        "aciklama":     "Ücretli · Hızlı · Tüm BIST hisseleri"
+    },
+    "Pro ($99/ay — 610 istek/dk)": {
+        "rate_per_min": 610,
+        "sleep":        0.2,
+        "batch_size":   100,
+        "aciklama":     "Ücretli · Çok hızlı · WebSocket destekli"
+    },
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
 # HİSSE LİSTELERİ
 # ══════════════════════════════════════════════════════════════════════════════
 ENDEKSLER = {
-    "BIST 30": [
+    "BIST 30 (Test için önerilir)": [
         'AKBNK','ARCLK','ASELS','BIMAS','DOHOL','EKGYO','EREGL','FROTO','GARAN',
         'GUBRF','HEKTS','ISCTR','KCHOL','KOZAL','MGROS','OYAKC','PETKM','PGSUS',
         'SAHOL','SISE','TAVHL','TCELL','THYAO','TKFEN','TOASO','TTKOM','TUPRS',
@@ -84,7 +102,7 @@ ENDEKSLER = {
         'ASCEL','ASGYO','ASTOR','ATAKP','ATGYO','AVGYO','AVHOL','AVOD','AVPGY',
         'AYCES','AYEN','AYES','AYDEM','AYGAZ','BAGFS','BALSU','BANVT','BASGZ',
         'BAYRK','BEYAZ','BFREN','BIENY','BINHO','BIOEN','BIZIM','BJKAS','BLCYT',
-        'BMEKS','BNTAS','BOSSA','BORSK','BRSAN','BSOKE','BUCIM','BURCE','BURVA',
+        'BMEKS','BNTAS','BOSSA','BORSK','BSOKE','BUCIM','BURCE','BURVA',
         'CANTE','CARFA','CASA','CEMAS','CEMTS','CLEBI','COPCL','CRDFA',
         'DARDL','DENGE','DERHL','DERIM','DESA','DEVA','DGATE','DGGYO','DIRIT',
         'DITAS','DMRGD','DNISI','DOBUR','DOCO','DOGUB','DOJOB','DOKTA','DORTS',
@@ -94,16 +112,15 @@ ENDEKSLER = {
         'EUREN','EYGYO','FADE','FENER','FITAS','FONET','FORTE','FRIGO',
         'GARFA','GEDIK','GEDZA','GENTS','GEREL','GLBMD','GLRYH','GMTAS',
         'GOKNR','GOODY','GOZDE','GRSEL','GSDDE','GSDHO','GSRAY','GULFA',
-        'GUNDG','HAEKO','HALKB','HDFGS','HEDEF','HKTM','HLGYO','HOROZ',
-        'HTTBT','HUNER','HURGZ','ICBCT','IDGYO','IEYHO','IHLGM','IHEVA',
-        'IHLAS','IHYAY','IKTLL','IMEN','INTEM','ITTFK','IZFAS','IZINV','IZMDC',
-        'JANTS','KATMR','KBORU','KFEIN','KGGYO','KIMMR','KLGYO','KLSER',
-        'KMPUR','KNFRT','KONYA','KOPOL','KORDS','KRDMA','KRDMB','KRPLS',
-        'KSTUR','KTLEV','KURTL','KUYAS','LIDER','LILAK','LINK','LKMNH','LUKSK',
-        'MAALT','MACKO','MAGEN','MAKIM','MAKTK','MANAS','MARBL','MARKA','MARTI',
-        'MEDTR','MEGAP','MEGMT','MEKAG','MERKO','METRO','METUR','MIPAZ',
-        'MNDRS','MOBTL','MOGAN','MRGYO','MRSHL','MSGYO','MTRKS','MZHLD',
-        'NATEN','NIBAS','NTHOL','NTTUR','NUGYO','NUHCM','NWIN',
+        'HAEKO','HALKB','HDFGS','HEDEF','HKTM','HLGYO','HOROZ','HTTBT','HUNER',
+        'ICBCT','IDGYO','IEYHO','IHLGM','IHEVA','IHLAS','IHYAY','IKTLL',
+        'IMEN','INTEM','ITTFK','IZFAS','IZINV','IZMDC','JANTS','KATMR','KBORU',
+        'KFEIN','KIMMR','KLGYO','KLSER','KMPUR','KNFRT','KONYA','KOPOL','KORDS',
+        'KRDMA','KRDMB','KRPLS','KSTUR','KTLEV','KURTL','KUYAS',
+        'LIDER','LILAK','LINK','LKMNH','LUKSK','MAALT','MACKO','MAGEN','MAKIM',
+        'MAKTK','MANAS','MARBL','MARKA','MARTI','MEDTR','MEGAP','MEGMT','MEKAG',
+        'MERKO','METRO','METUR','MIPAZ','MNDRS','MOBTL','MOGAN','MRGYO','MRSHL',
+        'MSGYO','MTRKS','MZHLD','NATEN','NIBAS','NTHOL','NUGYO','NUHCM','NWIN',
         'OBAMS','OFSYM','ONCSM','ONRYT','ORCAY','ORGE','OSTIM','OTKAR',
         'OYYAT','OZKGY','PAGYO','PAMEL','PAPIL','PARSN','PASEU','PATEK',
         'PCILT','PEGYO','PEKGY','PETUN','PINSU','PKART','PKENT','PLTUR',
@@ -115,15 +132,14 @@ ENDEKSLER = {
         'TBORG','TDGYO','TEKTU','TERA','TIRE','TRCAS','TRETN','TRGYO',
         'TRILC','TSGYO','TTRAK','TUCLK','TULGA','TURGZ','TURGG','TURGY','TURSG',
         'UFUK','ULUFA','ULUSE','ULUUN','USAK','USDMR','VAKFN','VAKGY',
-        'VANGD','VBTYZ','VERTU','VERUS','VKFYO',
-        'YAPRK','YATAS','YAYLA','YBTAS','YEOTK','YESIL','YGGYO','YKSLN',
-        'YONGA','YUNSA','YYAPI','ZEDUR','ZOREN','ZRGYO'
+        'VANGD','VBTYZ','VERTU','VERUS','VKFYO','YAPRK','YATAS','YAYLA',
+        'YBTAS','YEOTK','YESIL','YGGYO','YKSLN','YONGA','YUNSA','YYAPI',
+        'ZEDUR','ZOREN','ZRGYO'
     ]
 }
 for k in ENDEKSLER:
     ENDEKSLER[k] = list(dict.fromkeys(ENDEKSLER[k]))
 
-# ── Periyot tanımları ─────────────────────────────────────────────────────────
 PERIYOT_MAP = {
     '1 Dakikalık':  {'interval': '1min',  'outputsize': 100, 'key': '1m'},
     '5 Dakikalık':  {'interval': '5min',  'outputsize': 100, 'key': '5m'},
@@ -133,23 +149,18 @@ PERIYOT_MAP = {
     'Günlük':       {'interval': '1day',  'outputsize': 200, 'key': '1d'},
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# SESSION STATE
-# ══════════════════════════════════════════════════════════════════════════════
 if 'ozel_listeler' not in st.session_state:
     st.session_state.ozel_listeler = {}
 
 # ══════════════════════════════════════════════════════════════════════════════
-# VERİ ÇEKME — TWELVE DATA
+# VERİ ÇEKME
 # ══════════════════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=60)   # 1 dakika cache — gerçek zamanlı hissi
 def veri_cek_td(ticker, interval, outputsize, api_key):
-    """Twelve Data REST API ile OHLCV verisi çek"""
+    """Twelve Data REST API — cache YOK, her seferinde taze veri"""
     try:
-        symbol = f"{ticker}:XIST"
         url = "https://api.twelvedata.com/time_series"
         params = {
-            "symbol":     symbol,
+            "symbol":     f"{ticker}:XIST",
             "interval":   interval,
             "outputsize": outputsize,
             "apikey":     api_key,
@@ -159,52 +170,53 @@ def veri_cek_td(ticker, interval, outputsize, api_key):
         r = requests.get(url, params=params, timeout=15)
         data = r.json()
 
-        if data.get("status") == "error" or "values" not in data:
-            return None, data.get("message", "Bilinmeyen hata")
+        # Rate limit hatası
+        if data.get("status") == "error":
+            msg = data.get("message","Bilinmeyen hata")
+            if "credits" in msg.lower() or "limit" in msg.lower():
+                return None, "RATE_LIMIT"
+            return None, msg
+
+        if "values" not in data:
+            return None, "Veri yok"
 
         values = data["values"]
         if len(values) < 30:
-            return None, "Yetersiz veri"
+            return None, f"Yetersiz veri ({len(values)} mum)"
 
         df = pd.DataFrame(values)
         df["datetime"] = pd.to_datetime(df["datetime"])
         df.set_index("datetime", inplace=True)
-        df = df.rename(columns={
-            "open": "Open", "high": "High",
-            "low": "Low", "close": "Close", "volume": "Volume"
-        })
+        df = df.rename(columns={"open":"Open","high":"High","low":"Low","close":"Close","volume":"Volume"})
         for col in ["Open","High","Low","Close","Volume"]:
             df[col] = pd.to_numeric(df[col], errors="coerce")
         df.dropna(inplace=True)
         return df, None
 
     except requests.exceptions.Timeout:
-        return None, "Timeout"
+        return None, "Timeout (15sn)"
     except Exception as e:
-        return None, str(e)
+        return None, str(e)[:80]
 
 
-@st.cache_data(ttl=60)
-def toplu_fiyat_cek(tickers, api_key):
-    """Twelve Data batch endpoint — tek istekle çok hisse fiyatı"""
+def fiyat_cek_tek(ticker, api_key):
+    """Tek hisse anlık fiyat — 1 kredi"""
     try:
-        symbols = ",".join([f"{t}:XIST" for t in tickers])
-        url = "https://api.twelvedata.com/price"
-        params = {"symbol": symbols, "apikey": api_key}
-        r = requests.get(url, params=params, timeout=20)
+        r = requests.get(
+            "https://api.twelvedata.com/price",
+            params={"symbol": f"{ticker}:XIST", "apikey": api_key},
+            timeout=10
+        )
         data = r.json()
-        sonuc = {}
-        for ticker in tickers:
-            key = f"{ticker}:XIST"
-            if key in data and "price" in data[key]:
-                sonuc[ticker] = float(data[key]["price"])
-        return sonuc
+        if "price" in data:
+            return float(data["price"])
+        return None
     except Exception:
-        return {}
+        return None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# İNDİKATÖR HESAPLAMA
+# İNDİKATÖRLER
 # ══════════════════════════════════════════════════════════════════════════════
 def hesapla_indiktorler(df):
     if len(df) < 30:
@@ -212,21 +224,22 @@ def hesapla_indiktorler(df):
     df = df.copy()
     c, h, l, v = df["Close"], df["High"], df["Low"], df["Volume"]
     df["RSI"]       = ta.momentum.RSIIndicator(c, window=14).rsi()
-    macd_i          = ta.trend.MACD(c, window_slow=26, window_fast=12, window_sign=9)
-    df["MACD"]      = macd_i.macd()
-    df["MACD_sig"]  = macd_i.macd_signal()
-    df["MACD_hist"] = macd_i.macd_diff()
-    bb_i            = ta.volatility.BollingerBands(c, window=20, window_dev=2)
-    df["BB_upper"]  = bb_i.bollinger_hband()
-    df["BB_lower"]  = bb_i.bollinger_lband()
-    df["BB_middle"] = bb_i.bollinger_mavg()
-    stoch_i         = ta.momentum.StochasticOscillator(h, l, c, window=14, smooth_window=3)
-    df["STOCH_K"]   = stoch_i.stoch()
-    df["STOCH_D"]   = stoch_i.stoch_signal()
+    mi              = ta.trend.MACD(c, window_slow=26, window_fast=12, window_sign=9)
+    df["MACD"]      = mi.macd()
+    df["MACD_sig"]  = mi.macd_signal()
+    df["MACD_hist"] = mi.macd_diff()
+    bi              = ta.volatility.BollingerBands(c, window=20, window_dev=2)
+    df["BB_upper"]  = bi.bollinger_hband()
+    df["BB_lower"]  = bi.bollinger_lband()
+    df["BB_middle"] = bi.bollinger_mavg()
+    si              = ta.momentum.StochasticOscillator(h, l, c, window=14, smooth_window=3)
+    df["STOCH_K"]   = si.stoch()
+    df["STOCH_D"]   = si.stoch_signal()
     df["EMA20"]     = ta.trend.EMAIndicator(c, window=20).ema_indicator()
     df["EMA50"]     = ta.trend.EMAIndicator(c, window=50).ema_indicator()
     df["MFI"]       = ta.volume.MFIIndicator(h, l, c, v, window=14).money_flow_index()
     return df
+
 
 def skor_hesapla(row, close):
     skor = 50
@@ -242,25 +255,23 @@ def skor_hesapla(row, close):
         elif rsi > 65: skor -= 14
         elif rsi > 55: skor -= 6
 
-    macd_h = row.get("MACD_hist")
-    macd_v = row.get("MACD")
-    if pd.notna(macd_h):
-        ind["MACD_hist"] = round(float(macd_h), 4)
-        ind["MACD_yon"]  = "↑" if macd_h > 0 else "↓"
-        if macd_h > 0 and pd.notna(macd_v) and macd_v < 0:    skor += 18
-        elif macd_h > 0:                                        skor += 10
-        elif macd_h < 0 and pd.notna(macd_v) and macd_v > 0:  skor -= 18
-        else:                                                    skor -= 10
+    mh = row.get("MACD_hist")
+    mv = row.get("MACD")
+    if pd.notna(mh):
+        ind["MACD_hist"] = round(float(mh), 4)
+        ind["MACD_yon"]  = "↑" if mh > 0 else "↓"
+        if mh > 0 and pd.notna(mv) and mv < 0:    skor += 18
+        elif mh > 0:                                skor += 10
+        elif mh < 0 and pd.notna(mv) and mv > 0:  skor -= 18
+        else:                                        skor -= 10
 
-    bb_up  = row.get("BB_upper")
-    bb_low = row.get("BB_lower")
-    bb_mid = row.get("BB_middle")
-    if pd.notna(bb_up) and pd.notna(bb_low) and close:
-        bw = float(bb_up) - float(bb_low)
-        bp = (close - float(bb_low)) / bw if bw > 0 else 0.5
-        ind["BB_alt"]  = round(float(bb_low), 2)
-        ind["BB_orta"] = round(float(bb_mid), 2) if pd.notna(bb_mid) else None
-        ind["BB_ust"]  = round(float(bb_up), 2)
+    bu = row.get("BB_upper"); bl = row.get("BB_lower"); bm = row.get("BB_middle")
+    if pd.notna(bu) and pd.notna(bl) and close:
+        bw = float(bu) - float(bl)
+        bp = (close - float(bl)) / bw if bw > 0 else 0.5
+        ind["BB_alt"]  = round(float(bl), 2)
+        ind["BB_orta"] = round(float(bm), 2) if pd.notna(bm) else None
+        ind["BB_ust"]  = round(float(bu), 2)
         ind["BB_pct"]  = round(bp * 100, 1)
         if bp < 0.10:   skor += 20
         elif bp < 0.25: skor += 12
@@ -269,25 +280,23 @@ def skor_hesapla(row, close):
         elif bp > 0.75: skor -= 12
         elif bp > 0.65: skor -= 5
 
-    stk = row.get("STOCH_K")
-    std = row.get("STOCH_D")
-    if pd.notna(stk):
-        ind["Stoch_K"] = round(float(stk), 1)
-        ind["Stoch_D"] = round(float(std), 1) if pd.notna(std) else None
-        if stk < 20:   skor += 14
-        elif stk < 30: skor += 7
-        elif stk > 80: skor -= 14
-        elif stk > 70: skor -= 7
+    sk = row.get("STOCH_K"); sd = row.get("STOCH_D")
+    if pd.notna(sk):
+        ind["Stoch_K"] = round(float(sk), 1)
+        ind["Stoch_D"] = round(float(sd), 1) if pd.notna(sd) else None
+        if sk < 20:   skor += 14
+        elif sk < 30: skor += 7
+        elif sk > 80: skor -= 14
+        elif sk > 70: skor -= 7
 
-    ema20 = row.get("EMA20")
-    ema50 = row.get("EMA50")
-    if pd.notna(ema20) and pd.notna(ema50) and close:
-        e20, e50 = float(ema20), float(ema50)
-        ind["EMA20"] = round(e20, 2)
-        ind["EMA50"] = round(e50, 2)
-        if close > e20 > e50:
+    e20 = row.get("EMA20"); e50 = row.get("EMA50")
+    if pd.notna(e20) and pd.notna(e50) and close:
+        e20f, e50f = float(e20), float(e50)
+        ind["EMA20"] = round(e20f, 2)
+        ind["EMA50"] = round(e50f, 2)
+        if close > e20f > e50f:
             ind["EMA_trend"] = "↑ Yükseliş"; skor += 10
-        elif close < e20 < e50:
+        elif close < e20f < e50f:
             ind["EMA_trend"] = "↓ Düşüş";   skor -= 10
         else:
             ind["EMA_trend"] = "→ Nötr"
@@ -302,14 +311,16 @@ def skor_hesapla(row, close):
 
     return max(0, min(100, round(skor))), ind
 
-def skor_stil(skor):
-    if skor >= 70: return "GÜÇLÜ AL",  "#0d6e3b", "#d4f4e5", "🟢"
-    if skor >= 55: return "AL",         "#1a9653", "#e2f7ed", "🟩"
-    if skor >= 40: return "NÖTR",       "#7a6300", "#fdf4c7", "🟡"
-    if skor >= 25: return "SAT",        "#b83232", "#fde8e8", "🔴"
-    return              "GÜÇLÜ SAT", "#8b1a1a", "#f9d0d0", "⛔"
 
-def analiz_et(ticker, interval, outputsize, canli_fiyat=None):
+def skor_stil(s):
+    if s >= 70: return "GÜÇLÜ AL",  "#0d6e3b", "#d4f4e5", "🟢"
+    if s >= 55: return "AL",         "#1a9653", "#e2f7ed", "🟩"
+    if s >= 40: return "NÖTR",       "#7a6300", "#fdf4c7", "🟡"
+    if s >= 25: return "SAT",        "#b83232", "#fde8e8", "🔴"
+    return              "GÜÇLÜ SAT","#8b1a1a", "#f9d0d0", "⛔"
+
+
+def analiz_et(ticker, interval, outputsize):
     df, hata = veri_cek_td(ticker, interval, outputsize, API_KEY)
     if df is None:
         return None, hata
@@ -317,25 +328,24 @@ def analiz_et(ticker, interval, outputsize, canli_fiyat=None):
     if df is None or len(df) < 2:
         return None, "İndikatör hesaplanamadı"
     try:
-        son   = df.iloc[-1]
-        prev  = df.iloc[-2]
-        # Canlı fiyat varsa onu kullan, yoksa son mumu kullan
-        close = canli_fiyat if canli_fiyat else float(son["Close"])
+        son  = df.iloc[-1]
+        prev = df.iloc[-2]
+        close = float(son["Close"])
         skor, ind = skor_hesapla(son, close)
         return {
             "ticker":  ticker,
             "fiyat":   close,
-            "son_mum": float(son["Close"]),
             "degisim": ((close - float(prev["Close"])) / float(prev["Close"])) * 100,
             "high":    float(son["High"]),
             "low":     float(son["Low"]),
             "volume":  float(son["Volume"]),
             "skor":    skor,
             "ind":     ind,
-            "zaman":   son.name.strftime("%H:%M") if hasattr(son.name, "strftime") else "-",
+            "zaman":   str(son.name)[:16],
         }, None
     except Exception as e:
-        return None, str(e)
+        return None, str(e)[:80]
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
@@ -343,60 +353,75 @@ def analiz_et(ticker, interval, outputsize, canli_fiyat=None):
 with st.sidebar:
     st.markdown("## ⚙️ Ayarlar")
 
-    # API key kontrolü
     if not API_KEY:
-        st.error("⚠️ API key bulunamadı!\n\nStreamlit Cloud → Settings → Secrets bölümüne ekleyin:\n```\nTWELVEDATA_API_KEY = \"key\"\n```")
+        st.error("⚠️ API key bulunamadı!\n\nStreamlit Cloud → Settings → Secrets:\n```\nTWELVEDATA_API_KEY = \"key\"\n```")
         st.stop()
     else:
         st.success("✅ API bağlantısı hazır")
 
+    # ── Plan seçimi ───────────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("**💳 API Planı**")
+    plan_sec = st.selectbox("Plan", list(PLANLAR.keys()), label_visibility="collapsed")
+    plan = PLANLAR[plan_sec]
+    st.caption(plan["aciklama"])
+
+    if "Ücretsiz" in plan_sec:
+        n_hisse = len(ENDEKSLER.get("BIST 30 (Test için önerilir)", []))
+        est_dk = max(1, round(n_hisse / plan["rate_per_min"] * 1.2))
+        st.info(f"⏳ BIST 30 için tahmini süre: **~{est_dk} dakika**\n\nÜcretsiz plan: dakikada 8 istek. Her hisse 1 istek tüketir, her 6 hisseden sonra ~60sn bekler.")
+
+    # ── Hisse grubu ───────────────────────────────────────────────────────────
     st.markdown("---")
     st.markdown("**📂 Hisse Grubu**")
 
     endeks_sec  = list(ENDEKSLER.keys())
     kayitli_sec = list(st.session_state.ozel_listeler.keys())
-    ozel_sec    = ["➕ Özel Hisseler Gir"]
     ayrac       = ["─── Kayıtlı Listelerim ───"] if kayitli_sec else []
-
-    tum_sec = endeks_sec + ayrac + kayitli_sec + ozel_sec
-    grup_sec = st.selectbox("Grup", tum_sec, label_visibility="collapsed")
+    tum_sec     = endeks_sec + ayrac + kayitli_sec + ["➕ Özel Hisseler Gir"]
+    grup_sec    = st.selectbox("Grup", tum_sec, label_visibility="collapsed")
 
     hisseler_secilen = []
 
     if grup_sec in ENDEKSLER:
         hisseler_secilen = ENDEKSLER[grup_sec]
-        st.caption(f"📊 {len(hisseler_secilen)} hisse")
+        # Ücretsiz planda çok hisse uyarısı
+        if "Ücretsiz" in plan_sec and len(hisseler_secilen) > 20:
+            est = round(len(hisseler_secilen) / plan["rate_per_min"] * 1.2)
+            st.warning(f"⚠️ {len(hisseler_secilen)} hisse × ~8sn/istek = **~{est} dakika**\nTest için az hisse önerilir.")
+        else:
+            st.caption(f"📊 {len(hisseler_secilen)} hisse")
 
     elif grup_sec in st.session_state.ozel_listeler:
         hisseler_secilen = st.session_state.ozel_listeler[grup_sec]
         st.caption(f"📋 {len(hisseler_secilen)} hisse · Kayıtlı")
-        if st.button("🗑️ Bu listeyi sil", use_container_width=True):
+        if st.button("🗑️ Sil", use_container_width=True):
             del st.session_state.ozel_listeler[grup_sec]
             st.rerun()
 
     elif grup_sec == "➕ Özel Hisseler Gir":
-        girdi = st.text_area(
-            "Hisse kodları",
-            placeholder="OYAKC\nTHYAO\nGARAN",
-            height=130,
-            label_visibility="collapsed"
-        )
+        girdi = st.text_area("Hisse kodları",
+            placeholder="OYAKC\nTHYAO\nGARAN", height=120, label_visibility="collapsed")
         if girdi.strip():
             hisseler_secilen = list(dict.fromkeys([
                 h.strip().upper().replace(".IS","").replace(":XIST","")
                 for h in girdi.replace(",","\n").split("\n") if h.strip()
             ]))
-            st.caption(f"✅ {len(hisseler_secilen)} hisse")
+            if "Ücretsiz" in plan_sec:
+                est = round(len(hisseler_secilen) / plan["rate_per_min"] * 1.2)
+                st.caption(f"✅ {len(hisseler_secilen)} hisse · ~{est} dk")
+            else:
+                st.caption(f"✅ {len(hisseler_secilen)} hisse")
 
-        with st.expander("💾 Listeyi kaydet"):
-            liste_adi = st.text_input("Liste adı", placeholder="Portföyüm")
+        with st.expander("💾 Kaydet"):
+            ad = st.text_input("Liste adı", placeholder="Portföyüm")
             if st.button("Kaydet", use_container_width=True):
-                if liste_adi and hisseler_secilen:
-                    st.session_state.ozel_listeler[liste_adi] = hisseler_secilen
-                    st.success(f"✅ '{liste_adi}' kaydedildi!")
+                if ad and hisseler_secilen:
+                    st.session_state.ozel_listeler[ad] = hisseler_secilen
+                    st.success(f"✅ '{ad}' kaydedildi!")
                     st.rerun()
                 else:
-                    st.error("Liste adı ve hisse girişi gerekli.")
+                    st.error("Ad ve hisse gerekli.")
 
     # ── Periyot ───────────────────────────────────────────────────────────────
     st.markdown("---")
@@ -417,10 +442,10 @@ with st.sidebar:
         st.markdown("---")
         st.markdown("**📋 Kayıtlı Listelerim**")
         for ad, h in st.session_state.ozel_listeler.items():
-            st.caption(f"• {ad} ({len(h)} hisse)")
+            st.caption(f"• {ad} ({len(h)})")
 
     st.markdown("---")
-    st.caption("📡 Twelve Data · Gerçek Zamanlı · XIST\n\nCache: 1 dakika")
+    st.caption("📡 Twelve Data · XIST\nÜcretsiz: 8 istek/dk\nGrow: 55 istek/dk")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ANA SAYFA
@@ -435,7 +460,42 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if not tara_btn:
-    col1, col2, col3, col4 = st.columns(4)
+    # Plan karşılaştırma tablosu
+    st.markdown("### 💳 Plan Karşılaştırması")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div class="plan-kutu" style="background:#f0fdf4;border:1px solid #86efac;">
+        <b>🆓 Ücretsiz</b><br>
+        8 istek/dakika<br>
+        BIST 30 → ~5 dk<br>
+        BIST 100 → ~15 dk<br>
+        <b>Test için ideal</b>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="plan-kutu" style="background:#eff6ff;border:1px solid #93c5fd;">
+        <b>💰 Grow ($29/ay)</b><br>
+        55 istek/dakika<br>
+        BIST 30 → ~40 sn<br>
+        BIST 100 → ~2 dk<br>
+        <b>Günlük kullanım için</b>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="plan-kutu" style="background:#fdf4ff;border:1px solid #d8b4fe;">
+        <b>🚀 Pro ($99/ay)</b><br>
+        610 istek/dakika<br>
+        BIST TÜM → ~30 sn<br>
+        WebSocket destekli<br>
+        <b>Profesyonel kullanım</b>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    col1, col2 = st.columns(2)
     with col1:
         st.markdown("""
         **Puan Tablosu**
@@ -450,71 +510,93 @@ if not tara_btn:
     with col2:
         st.markdown("""
         **İndikatörler**
-        - RSI(14)
-        - MACD(12,26,9)
-        - Bollinger(20,2)
+        - RSI(14) · MACD(12,26,9)
+        - Bollinger Bantları(20,2)
         - Stochastic(14,3)
-        - EMA 20 & 50
-        - MFI(14)
+        - EMA 20 & 50 · MFI(14)
         """)
-    with col3:
-        st.markdown("""
-        **Endeks Grupları**
-        - BIST 30 · BIST 50
-        - BIST 100 · BIST TÜM
-        - Kayıtlı özel listeler
-        - Manuel hisse girişi
-        """)
-    with col4:
-        st.markdown("""
-        **Periyotlar**
-        - 1dk · 5dk · 15dk
-        - 1 Saatlik · 4 Saatlik
-        - Günlük
-        """)
-    st.info("👈 Sol menüden grup ve periyot seçip **TARA** butonuna bas.")
 
+    st.info("👈 Sol menüden plan, grup ve periyot seçip **TARA** butonuna bas.")
     if st.session_state.ozel_listeler:
         st.markdown("---")
-        st.markdown("### 📋 Kayıtlı Listelerim")
         for ad, h in st.session_state.ozel_listeler.items():
-            st.markdown(f"**{ad}** ({len(h)} hisse): `{'`, `'.join(h[:8])}{'...' if len(h)>8 else ''}`")
+            st.markdown(f"**{ad}**: `{'`, `'.join(h[:8])}{'...' if len(h)>8 else ''}`")
     st.stop()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TARAMA
 # ══════════════════════════════════════════════════════════════════════════════
 if not hisseler_secilen:
-    st.error("Lütfen sol menüden bir grup seçin veya hisse kodlarını girin.")
+    st.error("Lütfen bir hisse grubu seçin veya hisse kodları girin.")
     st.stop()
 
-if len(hisseler_secilen) > 100:
-    st.warning(f"⚠️ {len(hisseler_secilen)} hisse taranacak. API rate limit nedeniyle ~{len(hisseler_secilen)//8} dakika sürebilir.")
+toplam       = len(hisseler_secilen)
+sleep_sure   = plan["sleep"]
+batch_size   = plan["batch_size"]
+est_sure_sn  = toplam * sleep_sure
+est_sure_dk  = max(1, round(est_sure_sn / 60))
 
-# Önce batch ile canlı fiyatları çek (hızlı - tek istek)
-st.info("📡 Canlı fiyatlar çekiliyor...")
-canli_fiyatlar = {}
-# Twelve Data batch max 120 sembol destekliyor
-BATCH_SIZE = 100
-for i in range(0, len(hisseler_secilen), BATCH_SIZE):
-    batch = hisseler_secilen[i:i+BATCH_SIZE]
-    canli_fiyatlar.update(toplu_fiyat_cek(batch, API_KEY))
+if "Ücretsiz" in plan_sec and toplam > 8:
+    st.warning(
+        f"⏳ **{toplam} hisse × {sleep_sure:.0f}sn/hisse ≈ ~{est_sure_dk} dakika** sürecek.\n\n"
+        f"Ücretsiz planda her {batch_size} hisseden sonra sistem otomatik bekler. "
+        f"Sayfayı kapatmayın."
+    )
 
-sonuclar, hatalar = [], []
-pb    = st.progress(0)
-durum = st.empty()
+sonuclar   = []
+hatalar    = []
+rate_limit_bekle = False
+
+pb     = st.progress(0)
+durum  = st.empty()
+kredi_uyari = st.empty()
+
+istek_sayisi = 0
+baslangic    = time.time()
 
 for i, ticker in enumerate(hisseler_secilen):
-    durum.caption(f"⏳ **{ticker}** analiz ediliyor... ({i+1}/{len(hisseler_secilen)})")
-    canli = canli_fiyatlar.get(ticker)
-    r, hata = analiz_et(ticker, pconf["interval"], pconf["outputsize"], canli)
+    durum.caption(f"⏳ **{ticker}** analiz ediliyor... ({i+1}/{toplam})")
+
+    # Rate limit kontrolü: ücretsiz planda dakikada 8
+    # Her 7 istekten sonra kalan süreyi hesapla ve bekle
+    if istek_sayisi > 0 and istek_sayisi % batch_size == 0:
+        gecen = time.time() - baslangic
+        if gecen < 62:
+            bekle = 62 - gecen
+            for kalan in range(int(bekle), 0, -1):
+                kredi_uyari.info(f"⏸️ Rate limit koruması: **{kalan} saniye** bekleniyor... ({istek_sayisi}/{toplam} hisse tamamlandı)")
+                time.sleep(1)
+            kredi_uyari.empty()
+            baslangic = time.time()
+            istek_sayisi = 0
+
+    r, hata = analiz_et(ticker, pconf["interval"], pconf["outputsize"])
+
     if r:
         sonuclar.append(r)
+        istek_sayisi += 1
+    elif hata == "RATE_LIMIT":
+        # Beklenmedik rate limit — 65sn bekle ve tekrar dene
+        kredi_uyari.warning(f"⚠️ Rate limit! 65sn bekleniyor, sonra **{ticker}** tekrar denenecek...")
+        time.sleep(65)
+        kredi_uyari.empty()
+        baslangic = time.time()
+        istek_sayisi = 0
+        r2, hata2 = analiz_et(ticker, pconf["interval"], pconf["outputsize"])
+        if r2:
+            sonuclar.append(r2)
+            istek_sayisi += 1
+        else:
+            hatalar.append(f"{ticker}: {hata2 or 'Rate limit'}")
     else:
         hatalar.append(f"{ticker}: {hata}")
-    pb.progress((i + 1) / len(hisseler_secilen))
-    # Rate limit: Grow plan 55 istek/dakika → ~1.1 sn/istek güvenli
-    time.sleep(1.2)
+        istek_sayisi += 1
+
+    pb.progress((i + 1) / toplam)
+
+    # Normal bekleme (sadece ücretsiz plan için anlamlı)
+    if "Ücretsiz" in plan_sec:
+        time.sleep(sleep_sure)
 
 pb.empty()
 durum.empty()
@@ -536,8 +618,8 @@ c5.metric("🔴 SAT",       sum(1 for r in filtreli if 25<=r["skor"]<40))
 c6.metric("⛔ G.SAT",     sum(1 for r in filtreli if r["skor"]<25))
 
 if hatalar:
-    with st.expander(f"⚠️ {len(hatalar)} hissede sorun"):
-        for h in hatalar[:20]:
+    with st.expander(f"⚠️ {len(hatalar)} hissede sorun var"):
+        for h in hatalar[:30]:
             st.caption(h)
 
 st.markdown("---")
@@ -561,7 +643,7 @@ elif filtre2 == "Sadece Nötr":               filtreli = [r for r in filtreli if
 elif filtre2 == "Sadece SAT & Güçlü SAT":   filtreli = [r for r in filtreli if r["skor"]<40]
 
 if not filtreli:
-    st.info("Seçilen kriterlere uyan hisse bulunamadı.")
+    st.info("Bu kriterlere uyan hisse bulunamadı.")
     st.stop()
 
 # ── Kartlar ───────────────────────────────────────────────────────────────────
@@ -571,19 +653,17 @@ def rozet(label, val, bull):
     return f'<span class="rozet" style="background:{rb};color:{rc};">{label} {val}</span>'
 
 for r in filtreli:
-    etiket, fg, bg, emoji = skor_stil(r["skor"])
+    et, fg, bg, em = skor_stil(r["skor"])
     ind = r["ind"]
-    deg_renk = "green" if r["degisim"] >= 0 else "red"
-    deg_str  = f"+{r['degisim']:.2f}%" if r["degisim"] >= 0 else f"{r['degisim']:.2f}%"
-    canli_badge = "🟡 Canlı" if r["fiyat"] != r["son_mum"] else "📊 Mum"
+    drc = "green" if r["degisim"] >= 0 else "red"
+    drs = f"+{r['degisim']:.2f}%" if r["degisim"] >= 0 else f"{r['degisim']:.2f}%"
 
     with st.expander(
-        f"{emoji} **{r['ticker']}** — {r['fiyat']:.2f} TL  :{deg_renk}[{deg_str}]  |  Skor: **{r['skor']}** ({etiket})  ·  {r['zaman']}",
+        f"{em} **{r['ticker']}** — {r['fiyat']:.2f} TL  :{drc}[{drs}]  |  Skor: **{r['skor']}** ({et})  ·  {r['zaman']}",
         expanded=False
     ):
-        col_sol, col_sag = st.columns([3,1])
-
-        with col_sol:
+        cs, cd = st.columns([3,1])
+        with cs:
             html = ""
             if "RSI" in ind:
                 rv = ind["RSI"]
@@ -598,56 +678,52 @@ for r in filtreli:
                 sv = ind["Stoch_K"]
                 html += rozet("STOCH", sv, True if sv<30 else (False if sv>70 else None))
             if "EMA_trend" in ind:
-                et = ind["EMA_trend"]
-                html += rozet("EMA", et, True if "↑" in et else (False if "↓" in et else None))
+                et2 = ind["EMA_trend"]
+                html += rozet("EMA", et2, True if "↑" in et2 else (False if "↓" in et2 else None))
             if "MFI" in ind:
                 mv = ind["MFI"]
                 html += rozet("MFI", mv, True if mv<30 else (False if mv>70 else None))
-            html += f'<span class="rozet" style="background:#f0f4ff;color:#334;">{canli_badge}</span>'
             st.markdown(html, unsafe_allow_html=True)
             st.markdown("")
 
             detay = {}
-            if "RSI"       in ind: detay["RSI(14)"]     = ind["RSI"]
-            if "MACD_yon"  in ind: detay["MACD Yön"]    = ind["MACD_yon"]
-            if "MACD_hist" in ind: detay["MACD Hist"]   = ind["MACD_hist"]
+            if "RSI"       in ind: detay["RSI(14)"]       = ind["RSI"]
+            if "MACD_yon"  in ind: detay["MACD Yön"]      = ind["MACD_yon"]
+            if "MACD_hist" in ind: detay["MACD Hist"]     = ind["MACD_hist"]
             if "BB_alt"    in ind:
                 detay["BB Alt"]     = ind["BB_alt"]
                 detay["BB Orta"]    = ind["BB_orta"]
                 detay["BB Üst"]     = ind["BB_ust"]
                 detay["BB Konum %"] = ind["BB_pct"]
-            if "Stoch_K"   in ind: detay["Stoch K"]     = ind["Stoch_K"]
-            if "Stoch_D"   in ind: detay["Stoch D"]     = ind["Stoch_D"]
+            if "Stoch_K"   in ind: detay["Stoch K"]       = ind["Stoch_K"]
+            if "Stoch_D"   in ind: detay["Stoch D"]       = ind["Stoch_D"]
             if "EMA20"     in ind:
                 detay["EMA 20"] = ind["EMA20"]
                 detay["EMA 50"] = ind["EMA50"]
-            if "EMA_trend" in ind: detay["EMA Trend"]   = ind["EMA_trend"]
-            if "MFI"       in ind: detay["MFI(14)"]     = ind["MFI"]
-            detay["Canlı Fiyat"]   = f"{r['fiyat']:.2f} TL"
-            detay["Son Mum Kapanış"] = f"{r['son_mum']:.2f} TL"
+            if "EMA_trend" in ind: detay["EMA Trend"]     = ind["EMA_trend"]
+            if "MFI"       in ind: detay["MFI(14)"]       = ind["MFI"]
+            detay["Fiyat"]         = f"{r['fiyat']:.2f} TL"
             detay["Gün Yüksek"]    = f"{r['high']:.2f} TL"
             detay["Gün Düşük"]     = f"{r['low']:.2f} TL"
-            detay["Hacim"]         = f"{r['volume']/1e6:.2f}M lot"
-            detay["Son Güncelleme"] = r["zaman"]
+            detay["Hacim"]         = f"{r['volume']/1e6:.2f}M"
+            detay["Son Veri"]      = r["zaman"]
 
             df_det = pd.DataFrame(list(detay.items()), columns=["İndikatör","Değer"])
             st.dataframe(df_det, use_container_width=True, hide_index=True,
                          height=min(len(detay)*36+40, 500))
 
-        with col_sag:
-            bar_renk = "#22c55e" if r["skor"]>=70 else "#4ade80" if r["skor"]>=55 else "#fbbf24" if r["skor"]>=40 else "#f87171"
+        with cd:
+            br = "#22c55e" if r["skor"]>=70 else "#4ade80" if r["skor"]>=55 else "#fbbf24" if r["skor"]>=40 else "#f87171"
             st.markdown(f"""
             <div style="text-align:center;padding:14px;">
-              <div style="width:80px;height:80px;border-radius:50%;
-                background:{bg};color:{fg};display:flex;align-items:center;
-                justify-content:center;font-size:26px;font-weight:700;margin:0 auto;">
-                {r['skor']}
-              </div>
-              <div style="font-size:13px;font-weight:700;color:{fg};margin-top:8px;">{etiket}</div>
+              <div style="width:80px;height:80px;border-radius:50%;background:{bg};color:{fg};
+                display:flex;align-items:center;justify-content:center;font-size:26px;
+                font-weight:700;margin:0 auto;">{r['skor']}</div>
+              <div style="font-size:13px;font-weight:700;color:{fg};margin-top:8px;">{et}</div>
               <div style="margin-top:14px;">
                 <div style="font-size:10px;color:#999;margin-bottom:5px;">Sinyal Gücü</div>
                 <div style="background:#eee;border-radius:4px;height:10px;">
-                  <div style="width:{r['skor']}%;background:{bar_renk};height:10px;border-radius:4px;"></div>
+                  <div style="width:{r['skor']}%;background:{br};height:10px;border-radius:4px;"></div>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:9px;color:#bbb;margin-top:2px;">
                   <span>0</span><span>50</span><span>100</span>
@@ -656,40 +732,25 @@ for r in filtreli:
             </div>
             """, unsafe_allow_html=True)
 
-# ── CSV İndir ─────────────────────────────────────────────────────────────────
+# ── CSV ───────────────────────────────────────────────────────────────────────
 st.markdown("---")
 rows = []
 for r in filtreli:
-    etiket,_,_,_ = skor_stil(r["skor"])
+    et,_,_,_ = skor_stil(r["skor"])
     s = r["ind"]
-    rows.append({
-        "Hisse":          r["ticker"],
-        "Canlı Fiyat":    round(r["fiyat"],2),
-        "Değişim (%)":    round(r["degisim"],2),
-        "Gün Yüksek":     round(r["high"],2),
-        "Gün Düşük":      round(r["low"],2),
-        "Skor":           r["skor"],
-        "Sinyal":         etiket,
-        "RSI(14)":        s.get("RSI","-"),
-        "MACD Yön":       s.get("MACD_yon","-"),
-        "BB Konum%":      s.get("BB_pct","-"),
-        "BB Alt":         s.get("BB_alt","-"),
-        "BB Üst":         s.get("BB_ust","-"),
-        "Stoch K":        s.get("Stoch_K","-"),
-        "EMA20":          s.get("EMA20","-"),
-        "EMA50":          s.get("EMA50","-"),
-        "EMA Trend":      s.get("EMA_trend","-"),
-        "MFI(14)":        s.get("MFI","-"),
-        "Güncelleme":     r["zaman"],
-    })
+    rows.append({"Hisse":r["ticker"],"Fiyat(TL)":round(r["fiyat"],2),
+        "Değişim(%)":round(r["degisim"],2),"Yüksek":round(r["high"],2),
+        "Düşük":round(r["low"],2),"Skor":r["skor"],"Sinyal":et,
+        "RSI":s.get("RSI","-"),"MACD":s.get("MACD_yon","-"),
+        "BB%":s.get("BB_pct","-"),"Stoch K":s.get("Stoch_K","-"),
+        "EMA20":s.get("EMA20","-"),"EMA50":s.get("EMA50","-"),
+        "EMA Trend":s.get("EMA_trend","-"),"MFI":s.get("MFI","-"),
+        "Veri Zamanı":r["zaman"]})
 
 df_exp = pd.DataFrame(rows)
-c1, c2 = st.columns([1,3])
+c1, _ = st.columns([1,3])
 with c1:
-    st.download_button(
-        "📥 CSV İndir",
+    st.download_button("📥 CSV İndir",
         data=df_exp.to_csv(index=False).encode("utf-8-sig"),
-        file_name=f"BIST_{grup_sec.replace(' ','_')}_{pconf['key']}.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
+        file_name=f"BIST_{pconf['key']}.csv", mime="text/csv",
+        use_container_width=True)
