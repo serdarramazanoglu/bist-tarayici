@@ -160,7 +160,8 @@ def veri_cek_td(ticker, interval, outputsize, api_key):
     try:
         url = "https://api.twelvedata.com/time_series"
         params = {
-            "symbol":     f"{ticker}:XIST",
+            "symbol":     ticker,
+            "exchange":   "XIST",
             "interval":   interval,
             "outputsize": outputsize,
             "apikey":     api_key,
@@ -204,7 +205,7 @@ def fiyat_cek_tek(ticker, api_key):
     try:
         r = requests.get(
             "https://api.twelvedata.com/price",
-            params={"symbol": f"{ticker}:XIST", "apikey": api_key},
+            params={"symbol": ticker, "exchange": "XIST", "apikey": api_key},
             timeout=10
         )
         data = r.json()
